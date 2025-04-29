@@ -1,49 +1,41 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Reservation} from '../models/reservation';
-
+import {HttpClient} from "@angular/common/http";
+import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReservationService {
 
-  private reservations: Reservation[] =[];
+  private reservations: Reservation[] = [];
+  private apiUrl = 'http://localhost:3000';
 
-  constructor() {
-  let savedReservations = localStorage.getItem('reservations');
-  this.reservations = savedReservations? JSON.parse(savedReservations) : [];
+
+  constructor(private http: HttpClient) {
+
   }
 
-  getReservations(): Reservation[] {
-    return this.reservations;
+  getReservations(): Observable<Reservation[]> {
+    return this.http.get<Reservation[]>(this.apiUrl + '/reservations');
   }
 
-  getReservation(id: string): Reservation | undefined {
-    return this.reservations.find(r => r.id === id);
+  getReservation(id: string): Observable<Reservation> {
+    return this.http.get<Reservation>(this.apiUrl + '/reservation/' + id);
   }
 
   addReservation(reservation: Reservation) {
-    reservation.id= Date.now().toString();
-    this.reservations.push(reservation);
-
-    localStorage.setItem('reservations', JSON.stringify(this.reservations));
-    console.log('Added reservation');
-
+    reservation.id = Date.now().toString();
+    this.http.post(this.apiUrl + '/reservation', reservation).subscribe(reservation => {console.log(reservation);});
   }
 
   deleteReservation(id: string) {
-    let index = this.reservations.findIndex(r => r.id === id);
-    this.reservations.splice(index, 1);
-    localStorage.setItem('reservations', JSON.stringify(this.reservations));
-    console.log('Deleted reservation with id', id);
+    return this.http.delete<void>(this.apiUrl + '/reservation/' + id);
 
   }
 
-  updateReservation(reservation: Reservation, id: string): void {
-    let index = this.reservations.findIndex(r => r.id === id);
-    this.reservations[index] = reservation;
-    localStorage.setItem('reservations', JSON.stringify(this.reservations));
-    console.log('Update reservation');
+  updateReservation(reservation: Reservation, id: string): Observable<Reservation> {
+    return this.http.put<Reservation>(this.apiUrl + '/reservation/' + id, reservation);
 
   }
 }

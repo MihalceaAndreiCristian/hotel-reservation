@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Reservation} from '../models/reservation';
 import {ReservationService} from "../reservation/reservation.service";
 
@@ -11,12 +11,16 @@ import {ReservationService} from "../reservation/reservation.service";
 export class ReservationListComponent implements OnInit {
   reservations: Reservation[] = [];
 
-  constructor(private reservationService: ReservationService) {}
-   ngOnInit(): void {
-      this.reservations = this.reservationService.getReservations();
-   }
+  constructor(private reservationService: ReservationService) {
+  }
 
-   deleteReservation(id: string) {
-    this.reservationService.deleteReservation(id);
-   }
+  ngOnInit(): void {
+    this.reservationService.getReservations().subscribe(reservations => {
+      this.reservations = reservations
+    });
+  }
+
+  deleteReservation(id: string) {
+    this.reservationService.deleteReservation(id).subscribe(() => console.log('Reservation deleted successfully') );
+  }
 }
